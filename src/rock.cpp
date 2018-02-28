@@ -68,9 +68,9 @@ void Rock::set_position(float x, float y, float z) {
 void Rock::tick() {
   float LO = -0.1;
   float HI = 0.1;
-  //this->position.x += LO + static_cast<float> (rand()) / (static_cast <float> (RAND_MAX/(HI-LO)));
-  //this->position.z += LO + static_cast<float> (rand()) / (static_cast <float> (RAND_MAX/(HI-LO)));
-  //  this->rotation += 1;
+  this->position.x += LO + static_cast<float> (rand()) / (static_cast <float> (RAND_MAX/(HI-LO)));
+  this->position.z += LO + static_cast<float> (rand()) / (static_cast <float> (RAND_MAX/(HI-LO)));
+  
 }
 
 bounding_box_t Rock::bounding_box() {
