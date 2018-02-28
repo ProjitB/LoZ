@@ -18,6 +18,8 @@ public:
     float delta;
     float mastheight;
     float mastthickness;
+    float yaccel;
+    float yvelocity;
 private:
     VAO *frame_bottom;
     VAO *frame_sides;

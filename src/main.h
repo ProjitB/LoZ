@@ -73,6 +73,7 @@ struct bounding_box_t {
   float height;
 };
 
+bool detect_collision_player(bounding_box_t a, bounding_box_t b);
 bool detect_collision(bounding_box_t a, bounding_box_t b);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 extern float screen_zoom, screen_center_x, screen_center_y;

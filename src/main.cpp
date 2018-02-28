@@ -28,7 +28,7 @@ Timer t60(1.0 / 60);
 float xview(int type){
   switch(type){
     case 1:
-      return player.position.x;
+      return player.position.x + 3*sin(player.rotation*M_PI/180.0f);
     case 2:
       return player.position.x;
     case 3:
@@ -54,7 +54,7 @@ float yview(int type){
 float zview(int type){
   switch(type){
     case 1:
-      return 2 + player.position.z;
+      return 3*cos(player.rotation*M_PI/180.0f) + player.position.z;
     case 2:
       return player.position.z;
     case 3:
@@ -77,14 +77,14 @@ void draw() {
     
     // Eye - Location of camera. Don't change unless you are sure!!
     glm::vec3 eye (xview(viewType), yview(viewType), zview(viewType));
+    
     // Target - Where is the camera looking at.  Don't change unless you are sure!!
     glm::vec3 target = player.position;
-    target.z -= 2;
     if (viewType == 4) target.z -= 100;
     // Up - Up vector defines tilt of camera.  Don't change unless you are sure!!
     glm::vec3 up (0, 1, 0);
-    if (viewType == 2) glm::vec3 up (0, 0, -1);
-
+    if (viewType == 2) up.y = 0, up.z = -1;
+    else up.y = 1, up.z = 0;
     
     // Compute Camera matrix (view)
     Matrices.view = glm::lookAt( eye, target, up ); // Rotating Camera for 3D
@@ -93,7 +93,7 @@ void draw() {
 
     // Compute ViewProject matrix as view/camera might not be changed for this frame (basic scenario)
     // Don't change unless you are sure!!
-    glm::mat4 VP = Matrices.projection * Matrices.view;
+    glm::mat4 VP = Matrices.projection * Matrices.view ;
 
     // Send our transformation to the currently bound shader, in the "MVP" uniform
     // For each model you render, since the MVP will be different (at least the M part)
@@ -116,10 +116,19 @@ void tick_input(GLFWwindow *window) {
     int right = glfwGetKey(window, GLFW_KEY_RIGHT);
     int up = glfwGetKey(window, GLFW_KEY_UP);
     int down = glfwGetKey(window, GLFW_KEY_DOWN);
-    if (left) player.position.x -= player.speed;
-    if (right) player.position.x += player.speed;
-    if (up) player.position.z -= player.speed;
-    if (down) player.position.z += player.speed;
+    int space = glfwGetKey(window, GLFW_KEY_SPACE);
+    
+    if (left) player.rotation += 1;
+    if (right) player.rotation -= 1;
+    if (up) {
+      player.position.z -= player.speed*cos(player.rotation*M_PI/180.0f);
+      player.position.x -= player.speed*sin(player.rotation*M_PI/180.0f);
+    }
+    if (down) {
+      player.position.z += player.speed*cos(player.rotation*M_PI/180.0f);
+      player.position.x += player.speed*sin(player.rotation*M_PI/180.0f);
+    }
+    if (space && player.position.y == 0) player.yvelocity = 0.3;
 }
 
 void tick_camera(GLFWwindow *window) {
@@ -144,7 +153,7 @@ void tick_elements() {
 
 void collisions() {
   for (int i = 0; i < (int)rocks.size(); i++) {
-    if(detect_collision(rocks[i].bounding_box(), player.bounding_box()))
+    if(detect_collision_player(rocks[i].bounding_box(), player.bounding_box()))
       health--;
   }
   
@@ -217,6 +226,15 @@ int main(int argc, char **argv) {
     }
 
     quit(window);
+}
+
+bool detect_collision_player(bounding_box_t a, bounding_box_t b) {
+  float k;
+  if (a.y >= b.y) k = a.height + b.height;
+  else k = a.height;
+  return (abs(a.x - b.x) < (a.width + b.width)) &&
+           (abs(a.y - b.y) < k) &&
+           (abs(a.z - b.z) < (a.length + b.length));
 }
 
 bool detect_collision(bounding_box_t a, bounding_box_t b) {
