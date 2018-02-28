@@ -142,6 +142,13 @@ void tick_elements() {
   }
 }
 
+void collisions() {
+  for (int i = 0; i < (int)rocks.size(); i++) {
+    if(detect_collision(rocks[i].bounding_box(), player.bounding_box()))
+      health--;
+  }
+  
+}
 
 /* Initialize the OpenGL rendering properties */
 /* Add all the models to be created here */
@@ -151,7 +158,7 @@ void initGL(GLFWwindow *window, int width, int height) {
 
     player       = Boat(0, 0, 3);
     water       = Water(0, 0, 0, COLOR_BLUE);
-    testloc     = Boat(0, 1, -5);
+    testloc     = Boat(0, 0, -5);
     rocks.push_back(Rock(10, 1, -20, COLOR_BLACK));
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
@@ -200,6 +207,7 @@ int main(int argc, char **argv) {
           glfwSwapBuffers(window);
 
           tick_elements();
+          collisions();
           tick_camera(window);
           tick_input(window);
         }
@@ -212,8 +220,9 @@ int main(int argc, char **argv) {
 }
 
 bool detect_collision(bounding_box_t a, bounding_box_t b) {
-    return (abs(a.x - b.x) * 2 < (a.width + b.width)) &&
-           (abs(a.y - b.y) * 2 < (a.height + b.height));
+    return (abs(a.x - b.x) < (a.width + b.width)) &&
+           (abs(a.y - b.y) < (a.height + b.height)) &&
+           (abs(a.z - b.z) < (a.length + b.length));
 }
 
 void reset_screen() {

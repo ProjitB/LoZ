@@ -73,3 +73,7 @@ void Rock::tick() {
   //  this->rotation += 1;
 }
 
+bounding_box_t Rock::bounding_box() {
+  bounding_box_t bbox = {this->position.x, this->position.y, this->position.z, 1, 1, 1};
+  return bbox;
+}

@@ -387,3 +387,7 @@ void Boat::tick() {
     //this->position.y -= speed;
 }
 
+bounding_box_t Boat::bounding_box() {
+  bounding_box_t bbox = { this->position.x, this->position.y, this->position.z, 0.75, 1.75, this->mastheight};
+  return bbox;
+}
