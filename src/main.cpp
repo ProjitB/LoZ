@@ -14,7 +14,7 @@ GLFWwindow *window;
 * Customizable functions *
 **************************/
 
-int health = 10, level = 1, score = 0;
+int health = 1000, level = 1, score = 0;
 Boat player;
 Water water;
 Boat testloc;
@@ -154,9 +154,31 @@ void tick_elements() {
 void collisions() {
   for (int i = 0; i < (int)rocks.size(); i++) {
     if(detect_collision_player(rocks[i].bounding_box(), player.bounding_box()))
-      health--;
+      health--, player.yvelocity = 0.2;
+    
   }
   
+}
+
+void helperGenerateRocks(float LO, float HI, float quadx, float quadz){
+  int numRocks = 10.0 + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(10.0)));
+  for(int i = 0; i < numRocks; i++)
+    {
+      float y = 0.25 + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(0.75)));
+      float x = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
+      float z = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
+      rocks.push_back(Rock(x*quadx, y, z*quadz, COLOR_BLACK));
+    }
+  return;
+}
+
+void generaterocks(){
+  helperGenerateRocks(5.0, 90.0, 1, 1);
+  helperGenerateRocks(5.0, 90.0, 1, -1);
+  helperGenerateRocks(5.0, 90.0, -1, -1);
+  helperGenerateRocks(5.0, 90.0, -1, 1);
+
+  return;
 }
 
 /* Initialize the OpenGL rendering properties */
@@ -168,7 +190,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     player       = Boat(0, 0, 3);
     water       = Water(0, 0, 0, COLOR_BLUE);
     testloc     = Boat(0, 0, -5);
-    rocks.push_back(Rock(10, 1, -20, COLOR_BLACK));
+    generaterocks();
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
     // Get a handle for our "MVP" uniform
@@ -232,9 +254,9 @@ bool detect_collision_player(bounding_box_t a, bounding_box_t b) {
   float k;
   if (a.y >= b.y) k = a.height + b.height;
   else k = a.height;
-  return (abs(a.x - b.x) < (a.width + b.width)) &&
+  return (abs(a.x - b.x) < (a.width + b.width + b.length*sin(player.rotation*M_PI/180.0f))) &&
            (abs(a.y - b.y) < k) &&
-           (abs(a.z - b.z) < (a.length + b.length));
+    (abs(a.z - b.z) < (a.length + b.length - b.width*sin(player.rotation*M_PI/180.0f)));
 }
 
 bool detect_collision(bounding_box_t a, bounding_box_t b) {
