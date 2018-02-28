@@ -34,7 +34,7 @@ float xview(int type){
     case 3:
       return 0;
     case 4:
-      return player.position.x;
+      return player.position.x - 1.75*sin(player.rotation*M_PI/180.0f);
     }
 }
 
@@ -60,7 +60,7 @@ float zview(int type){
     case 3:
       return 0;
     case 4:
-      return player.position.z - 1.75;
+      return player.position.z - 1.75*cos(player.rotation*M_PI/180.0f);
   }
 }
 
@@ -80,11 +80,11 @@ void draw() {
     
     // Target - Where is the camera looking at.  Don't change unless you are sure!!
     glm::vec3 target = player.position;
-    if (viewType == 4) target.z -= 100;
+    if (viewType == 4) target.z -= 100*cos(player.rotation*M_PI/180.0f), target.x -= 100*sin(player.rotation*M_PI/180.0f);
     // Up - Up vector defines tilt of camera.  Don't change unless you are sure!!
     glm::vec3 up (0, 1, 0);
-    if (viewType == 2) up.y = 0, up.z = -1;
-    else up.y = 1, up.z = 0;
+    if (viewType == 2) up.y = 0, up.z = -1*cos(player.rotation*M_PI/180.0f), up.x = -1*sin(player.rotation*M_PI/180.0f);
+    else up.y = 1, up.z = 0, up.x = 0;
     
     // Compute Camera matrix (view)
     Matrices.view = glm::lookAt( eye, target, up ); // Rotating Camera for 3D
