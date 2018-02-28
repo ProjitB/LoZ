@@ -2,6 +2,7 @@
 #include "timer.h"
 #include "boat.h"
 #include "water.h"
+#include "rock.h"
 
 using namespace std;
 
@@ -13,12 +14,15 @@ GLFWwindow *window;
 * Customizable functions *
 **************************/
 
+int health = 10, level = 1, score = 0;
 Boat player;
 Water water;
 Boat testloc;
 int viewType = 1;
 float screen_zoom = 100, screen_center_x = 0, screen_center_y = 0;
 float camera_rotation_angle = 0;
+vector<Rock> rocks;
+
 Timer t60(1.0 / 60);
 
 float xview(int type){
@@ -37,7 +41,7 @@ float xview(int type){
 float yview(int type){
   switch(type){
     case 1:
-      return 4;
+      return player.position.y + 3;
     case 2 :
       return 30;
     case 3:
@@ -101,6 +105,9 @@ void draw() {
     water.draw(VP);
     player.draw(VP);
     testloc.draw(VP);
+    for (int i = 0; i < (int)rocks.size(); i++) {
+      rocks[i].draw(VP);
+    }
 }
 
 
@@ -130,8 +137,11 @@ void tick_camera(GLFWwindow *window) {
 
 void tick_elements() {
   player.tick();
-  
+  for (int i = 0; i < (int)rocks.size(); i++) {
+    rocks[i].tick();
+  }
 }
+
 
 /* Initialize the OpenGL rendering properties */
 /* Add all the models to be created here */
@@ -139,9 +149,10 @@ void initGL(GLFWwindow *window, int width, int height) {
     /* Objects should be created before any other gl function and shaders */
     // Create the models
 
-    player       = Boat(0, 1, 3);
+    player       = Boat(0, 0, 3);
     water       = Water(0, 0, 0, COLOR_BLUE);
     testloc     = Boat(0, 1, -5);
+    rocks.push_back(Rock(10, 1, -20, COLOR_BLACK));
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
     // Get a handle for our "MVP" uniform
@@ -168,7 +179,7 @@ int main(int argc, char **argv) {
     srand(time(0));
     int width  = 600;
     int height = 600;
-
+    char stringPrint[1000];
     window = initGLFW(width, height);
 
     initGL (window, width, height);
@@ -179,15 +190,18 @@ int main(int argc, char **argv) {
         // Process timers
 
         if (t60.processTick()) {
-            // 60 fps
-            // OpenGL Draw commands
-            draw();
-            // Swap Frame Buffer in double buffering
-            glfwSwapBuffers(window);
+          // 60 fps
+          // OpenGL Draw commands
+          sprintf(stringPrint, "Level: %d  Score: %d Health: %d", level, score, health);
+          glfwSetWindowTitle(window, stringPrint);
+          
+          draw();
+          // Swap Frame Buffer in double buffering
+          glfwSwapBuffers(window);
 
-            tick_elements();
-            tick_camera(window);
-            tick_input(window);
+          tick_elements();
+          tick_camera(window);
+          tick_input(window);
         }
 
         // Poll for Keyboard and mouse events
