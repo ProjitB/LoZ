@@ -3,8 +3,8 @@ Legend of Zelda 3D Game
 
 Controls:
 
-   Arrow Keys:
-      (Moves relative to the ships current position)   
+   Arrow Keys(Moves relative to the ships current position):
+      
       Up :: Move Forward
       Down :: Move Backward
       Right :: Move Right
@@ -20,6 +20,7 @@ Controls:
       1 :: Follow - Cam View
       2 :: Top View
       3 :: Tower View
+      4 :: Boat View
 
 
 
