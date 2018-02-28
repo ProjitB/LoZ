@@ -13,7 +13,7 @@ Boat::Boat(float x, float y, float z) {
       0.5f+delta/2, 0.0f, 1.0f,
       0.5f-delta/2, 0.0f, -1.0f,
       0.5f+delta/2, 0.0f, 1.0f,
-      0.5f+delta/2, 0, -1.0f,
+      0.5f+delta/2, 0.0f, -1.0f,
       //Left bottom
       -0.5f+delta/2, 0.0f, -1.0f,
       -0.5f+delta/2, 0.0f, 1.0f,
@@ -96,19 +96,19 @@ Boat::Boat(float x, float y, float z) {
     
     static const GLfloat vertex_main_frame_bottom[] = {
       //Bottom Rectangle
-      0.5f, 0.0f, -1.0f,
-      0.5f, 0.0f, 1.0f,
-      -0.5f, 0.0f, 1.0f,
-      0.5f, 0.0f, -1.0f,
-      -0.5f, 0.0f, 1.0f,
-      -0.5f, 0.0f, -1.0f,
+      0.5f, 0.01f, -1.0f,
+      0.5f, 0.01f, 1.0f,
+      -0.5f, 0.01f, 1.0f,
+      0.5f, 0.01f, -1.0f,
+      -0.5f, 0.01f, 1.0f,
+      -0.5f, 0.01f, -1.0f,
       //Triangles on both ends
-      0.5f, 0.0f, -1.0f,
-      -0.5f, 0.0f, -1.0f,
-      0.0f, 0.0f, -1.5f,
-      0.5f, 0.0f, 1.0f,
-      -0.5f, 0.0f, 1.0f,
-      0.0f, 0.0f, 1.5f
+      0.5f, 0.01f, -1.0f,
+      -0.5f, 0.01f, -1.0f,
+      0.0f, 0.01f, -1.5f,
+      0.5f, 0.01f, 1.0f,
+      -0.5f, 0.01f, 1.0f,
+      0.0f, 0.01f, 1.5f
     };
     this->frame_bottom = create3DObject(GL_TRIANGLES, 4*3, vertex_main_frame_bottom, COLOR_DARK_BROWN, GL_FILL);
 
