@@ -7,6 +7,8 @@ Boat::Boat(float x, float y, float z) {
     speed = 0.2;
     delta = 0.01;
     yvelocity = 0;
+    xautovelocity = 0;
+    zautovelocity = 0;
     yaccel = -0.01;
     static const GLfloat vertex_main_frame_borders[] = {
       //Right bottom
@@ -384,9 +386,8 @@ void Boat::set_position(float x, float y, float z) {
 }
 
 void Boat::tick() {
-  //this->rotation += speed;
-    //this->position.x -= speed;
-    //this->position.y -= speed;
+  this->position.z += this->zautovelocity;
+  this->position.x += this->xautovelocity;
   this->position.y += this->yvelocity;
   this->yvelocity += this->yaccel;
   if(this->position.y <= 0 && this->yvelocity < 0) this->position.y = 0, this->yvelocity = 0;

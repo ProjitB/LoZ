@@ -78,6 +78,10 @@ bool detect_collision(bounding_box_t a, bounding_box_t b);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 extern float screen_zoom, screen_center_x, screen_center_y;
 void reset_screen();
+void wind();
+void collisions();
+void helperGenerateRocks(float LO, float HI, float quadx, float quadz);
+void generaterocks();
 
 // ---- Colors ----
 extern const color_t COLOR_RED;

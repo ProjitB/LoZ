@@ -144,10 +144,37 @@ void tick_camera(GLFWwindow *window) {
 
 }
 
+
 void tick_elements() {
   player.tick();
   for (int i = 0; i < (int)rocks.size(); i++) {
     rocks[i].tick();
+  }
+  wind();
+}
+
+int windlock = 400, windCounter = 0, windLast = 80, windLastCounter = 0, windBool = 0;
+void wind(){
+  if(windCounter == windlock && !windBool){//Wind Start,Intialize Wind
+    windBool = 1;
+    windLastCounter = 0;
+    float windAngle = 0 + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/360));
+    windlock = 300 + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/300));
+    player.xautovelocity = 0.1 * sin(windAngle * M_PI / 180.0f);
+    player.zautovelocity = 0.1 * cos(windAngle * M_PI / 180.0f);
+  }
+  if(windBool){//When Wind
+    windLastCounter++;
+  }
+  else{//When Not Wind
+    windCounter++;
+  }
+  if(windLastCounter == windLast && windBool){//Wind End
+    windBool = 0;
+    windCounter = 0;
+    player.xautovelocity = 0;
+    player.zautovelocity = 0;
+    windLast = 200 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/100));
   }
 }
 

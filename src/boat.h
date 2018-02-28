@@ -20,6 +20,8 @@ public:
     float mastthickness;
     float yaccel;
     float yvelocity;
+    float zautovelocity;
+    float xautovelocity;
 private:
     VAO *frame_bottom;
     VAO *frame_sides;
