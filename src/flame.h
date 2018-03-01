@@ -18,6 +18,7 @@ public:
     float yaccel;
     float velocity;
     float angle;
+    float size;
     bounding_box_t bounding_box();
 private:
     VAO *object;

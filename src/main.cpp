@@ -4,6 +4,7 @@
 #include "water.h"
 #include "rock.h"
 #include "flame.h"
+#include "monster.h"
 
 using namespace std;
 
@@ -24,6 +25,7 @@ float screen_zoom = 100, screen_center_x = 0, screen_center_y = 0;
 float camera_rotation_angle = 0;
 vector<Rock> rocks;
 vector<Flame> flames;
+vector<Monster> monsters;
 
 Timer t60(1.0 / 60);
 
@@ -113,6 +115,9 @@ void draw() {
     for (int i = 0; i < (int)flames.size(); i++) {
     flames[i].draw(VP);      
     }
+    for (int i = 0; i < (int)monsters.size(); i++){
+      monsters[i].draw(VP);
+    }
 
 }
 
@@ -183,6 +188,9 @@ void tick_elements() {
     if(flames[i].position.y < 0) flames.erase(flames.begin() + i);
     flames[i].tick();
   }
+  for (int i = 0; i < (int)monsters.size(); i++) {
+    monsters[i].tick();
+  }
   wind();
 }
 
@@ -211,12 +219,28 @@ void wind(){
   }
 }
 
-void collisions() {
+void detect_player_rock_collisions(){
   for (int i = 0; i < (int)rocks.size(); i++) {
     if(detect_collision_player(rocks[i].bounding_box(), player.bounding_box()))
       health--, player.yvelocity = 0.2;
     
   }
+}
+
+void cannonball_monster_collisions(){
+  for (int i = 0; i < (int)monsters.size(); i++){
+    for (int j = 0; j < (int)flames.size(); j++){
+      if (detect_collision(flames[j].bounding_box(), monsters[i].bounding_box())){
+        monsters[i].health -= player.power;
+        flames.erase(flames.begin() + j);        
+      }
+    }
+  }
+}
+
+void collisions() {
+  detect_player_rock_collisions();
+  cannonball_monster_collisions();
   
 }
 
@@ -239,6 +263,16 @@ void generaterocks(){
   helperGenerateRocks(5.0, 90.0, -1, 1);
 
   return;
+}
+
+int monlock = 0;
+void monster_handling(){
+  if (monlock == 0)
+    monsters.push_back(Monster(20, 2, -20, 1, 50)), monlock++;
+  for (int i = 0; i < (int)monsters.size(); i++)
+    {
+      if (monsters[i].health <= 0) monsters.erase(monsters.begin() + i), score += 50;
+    }
 }
 
 /* Initialize the OpenGL rendering properties */
@@ -296,7 +330,7 @@ int main(int argc, char **argv) {
           draw();
           // Swap Frame Buffer in double buffering
           glfwSwapBuffers(window);
-
+          monster_handling();
           tick_elements();
           collisions();
           tick_camera(window);

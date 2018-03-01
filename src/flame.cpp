@@ -6,6 +6,7 @@ Flame::Flame(float x, float y, float z, float size, float angle, float velocity,
     this->velocity = velocity;
     this->angle = angle;
     this->rotation = 0;
+    this->size = size;
     this->yvelocity = yvelocity;
     this->yaccel = -0.01;
     speed = 1;
@@ -80,6 +81,6 @@ void Flame::tick() {
 }
 
 bounding_box_t Flame::bounding_box() {
-  bounding_box_t bbox = {this->position.x, this->position.y, this->position.z, 1, 1, 1};
+  bounding_box_t bbox = {this->position.x, this->position.y, this->position.z, this->size, this->size, this->size};
   return bbox;
 }
