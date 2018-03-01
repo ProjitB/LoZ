@@ -3,6 +3,7 @@
 #include "boat.h"
 #include "water.h"
 #include "rock.h"
+#include "flame.h"
 
 using namespace std;
 
@@ -117,7 +118,7 @@ void tick_input(GLFWwindow *window) {
     int up = glfwGetKey(window, GLFW_KEY_UP);
     int down = glfwGetKey(window, GLFW_KEY_DOWN);
     int space = glfwGetKey(window, GLFW_KEY_SPACE);
-    
+    int f = glfwGetKey(window, GLFW_KEY_F);
     if (left) player.rotation += 1;
     if (right) player.rotation -= 1;
     if (up) {
@@ -129,6 +130,16 @@ void tick_input(GLFWwindow *window) {
       player.position.x += player.speed*sin(player.rotation*M_PI/180.0f);
     }
     if (space && player.position.y == 0) player.yvelocity = 0.3;
+    if (f) {
+      if (viewType == 1)
+        cannon();
+    }
+}
+
+void cannon(){
+  double xpos, ypos;
+  glfwGetCursorPos(window, &xpos, &ypos);
+  cout << xpos << ", " << ypos << "\n";
 }
 
 void tick_camera(GLFWwindow *window) {
@@ -150,7 +161,7 @@ void tick_elements() {
   for (int i = 0; i < (int)rocks.size(); i++) {
     rocks[i].tick();
   }
-  wind();
+  wind();  
 }
 
 int windlock = 400, windCounter = 0, windLast = 80, windLastCounter = 0, windBool = 0;
@@ -222,7 +233,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
     // Get a handle for our "MVP" uniform
     Matrices.MatrixID = glGetUniformLocation(programID, "MVP");
-    Matrices.projection = glm::perspective(glm::radians(screen_zoom), (float)height / (float)width, 0.1f, 200.0f);
+    Matrices.projection = glm::perspective(glm::radians(screen_zoom), (float)height / (float)width, 0.1f, 100.0f);
 
     reshapeWindow (window, width, height);
 

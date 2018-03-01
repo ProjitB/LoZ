@@ -82,6 +82,7 @@ void wind();
 void collisions();
 void helperGenerateRocks(float LO, float HI, float quadx, float quadz);
 void generaterocks();
+void cannon();
 
 // ---- Colors ----
 extern const color_t COLOR_RED;
