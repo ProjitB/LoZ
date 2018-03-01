@@ -136,22 +136,27 @@ void tick_input(GLFWwindow *window) {
     }
     if (space && player.position.y == 0) player.yvelocity = 0.3;
     if (f) {
-      if (viewType == 1)
-        cannon();
+        cannon(viewType);
     }
 }
 
-void cannon(){
-  double xpos, ypos;
-  glfwGetCursorPos(window, &xpos, &ypos);
-  if(xpos < 0 || xpos > 600 || ypos < 0 || ypos > 600) //Valid Mouse Locations
-    return;
-  float dist = sqrt((xpos-300)*(xpos-300) + (ypos-300)*(ypos-300));
-  float angle = acos((ypos-300) * (-300) / (300*dist));
-  if (xpos <= 300) angle *= -1;
-  angle -= player.rotation * M_PI / 180.0f;
-  flames.push_back(Flame(player.position.x, player.position.y, player.position.z, 0.3, angle, 0.5, 0.4, COLOR_RED));
-  //  cout << xpos << ", " << ypos << ", " << dist << ", " << angle << "\n";
+int canCount = 0;
+void cannon(int viewType){
+  if (viewType == 1 || viewType == 2){
+    if(canCount < 40) return;
+    canCount = 0;
+    double xpos, ypos;
+    glfwGetCursorPos(window, &xpos, &ypos);
+    if(xpos < 0 || xpos > 600 || ypos < 0 || ypos > 600) //Valid Mouse Locations
+      return;
+    float dist = sqrt((xpos-300)*(xpos-300) + (ypos-300)*(ypos-300));
+    float angle = acos((ypos-300) * (-300) / (300*dist)); //dot product
+    if (xpos <= 300) angle *= -1;
+    angle -= player.rotation * M_PI / 180.0f;
+    flames.push_back(Flame(player.position.x, player.position.y+2, player.position.z, 0.3, angle, 0.5, dist/900.0, COLOR_RED));
+    //  cout << // XXX: pos << ", " << ypos << ", " << dist << ", " << angle << "\n";
+  }
+  return;
 }
 
 void tick_camera(GLFWwindow *window) {
@@ -169,6 +174,7 @@ void tick_camera(GLFWwindow *window) {
 
 
 void tick_elements() {
+  canCount++;
   player.tick();
   for (int i = 0; i < (int)rocks.size(); i++) {
     rocks[i].tick();
