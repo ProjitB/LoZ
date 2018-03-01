@@ -1,9 +1,13 @@
 #include "flame.h"
 #include "main.h"
 
-Flame::Flame(float x, float y, float z, float size, color_t color) {
+Flame::Flame(float x, float y, float z, float size, float angle, float velocity, float yvelocity, color_t color) {
     this->position = glm::vec3(x, y, z);
+    this->velocity = velocity;
+    this->angle = angle;
     this->rotation = 0;
+    this->yvelocity = yvelocity;
+    this->yaccel = -0.01;
     speed = 1;
     // Our vertices. Three consecutive floats give a 3D vertex; Three consecutive vertices give a triangle.
     // A cube has 6 faces with 2 triangles each, so this makes 6*2=12 triangles, and 12*3 vertices
@@ -68,8 +72,10 @@ void Flame::set_position(float x, float y, float z) {
 void Flame::tick() {
   float LO = -0.1;
   float HI = 0.1;
-  this->position.x += LO + static_cast<float> (rand()) / (static_cast <float> (RAND_MAX/(HI-LO)));
-  this->position.z += LO + static_cast<float> (rand()) / (static_cast <float> (RAND_MAX/(HI-LO)));
+  this->position.x += this->velocity * sin(this->angle);
+  this->position.z += this->velocity * cos(this->angle) * -1;
+  this->position.y += this->yvelocity;
+  this->yvelocity += this->yaccel;
   
 }
 

@@ -23,6 +23,7 @@ int viewType = 1;
 float screen_zoom = 100, screen_center_x = 0, screen_center_y = 0;
 float camera_rotation_angle = 0;
 vector<Rock> rocks;
+vector<Flame> flames;
 
 Timer t60(1.0 / 60);
 
@@ -109,6 +110,10 @@ void draw() {
     for (int i = 0; i < (int)rocks.size(); i++) {
       rocks[i].draw(VP);
     }
+    for (int i = 0; i < (int)flames.size(); i++) {
+    flames[i].draw(VP);      
+    }
+
 }
 
 
@@ -139,7 +144,14 @@ void tick_input(GLFWwindow *window) {
 void cannon(){
   double xpos, ypos;
   glfwGetCursorPos(window, &xpos, &ypos);
-  cout << xpos << ", " << ypos << "\n";
+  if(xpos < 0 || xpos > 600 || ypos < 0 || ypos > 600) //Valid Mouse Locations
+    return;
+  float dist = sqrt((xpos-300)*(xpos-300) + (ypos-300)*(ypos-300));
+  float angle = acos((ypos-300) * (-300) / (300*dist));
+  if (xpos <= 300) angle *= -1;
+  angle -= player.rotation * M_PI / 180.0f;
+  flames.push_back(Flame(player.position.x, player.position.y, player.position.z, 0.3, angle, 0.5, 0.4, COLOR_RED));
+  //  cout << xpos << ", " << ypos << ", " << dist << ", " << angle << "\n";
 }
 
 void tick_camera(GLFWwindow *window) {
@@ -161,7 +173,11 @@ void tick_elements() {
   for (int i = 0; i < (int)rocks.size(); i++) {
     rocks[i].tick();
   }
-  wind();  
+  for (int i = 0; i < (int)flames.size(); i++) {
+    if(flames[i].position.y < 0) flames.erase(flames.begin() + i);
+    flames[i].tick();
+  }
+  wind();
 }
 
 int windlock = 400, windCounter = 0, windLast = 80, windLastCounter = 0, windBool = 0;
