@@ -83,6 +83,9 @@ void collisions();
 void helperGenerateRocks(float LO, float HI, float quadx, float quadz);
 void generaterocks();
 void cannon(int viewType);
+void monster_handling();
+void generateMonsters();
+void helperGenerateMonsters(float quadx, float quadz);
 
 // ---- Colors ----
 extern const color_t COLOR_RED;

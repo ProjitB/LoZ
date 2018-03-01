@@ -48,7 +48,7 @@ Monster::Monster(float x, float y, float z, float size, int health) {
         size,-2*size, size
     };
 
-    this->main_body = create3DObject(GL_TRIANGLES, 12*3, vertex_main_body, COLOR_BLACK, GL_FILL);
+    this->main_body = create3DObject(GL_TRIANGLES, 12*3, vertex_main_body, COLOR_GREEN, GL_FILL);
 
     static const GLfloat vertex_face[] = {
       size/2+size/6, 1.6*size, size+0.001f,

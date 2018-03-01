@@ -109,16 +109,9 @@ void draw() {
     water.draw(VP);
     player.draw(VP);
     testloc.draw(VP);
-    for (int i = 0; i < (int)rocks.size(); i++) {
-      rocks[i].draw(VP);
-    }
-    for (int i = 0; i < (int)flames.size(); i++) {
-    flames[i].draw(VP);      
-    }
-    for (int i = 0; i < (int)monsters.size(); i++){
-      monsters[i].draw(VP);
-    }
-
+    for (int i = 0; i < (int)rocks.size(); rocks[i++].draw(VP));
+    for (int i = 0; i < (int)flames.size(); flames[i++].draw(VP));     
+    for (int i = 0; i < (int)monsters.size(); monsters[i++].draw(VP));
 }
 
 
@@ -264,13 +257,31 @@ void generaterocks(){
 
   return;
 }
+void helperGenerateMonsters(float quadx, float quadz){
+  float LO = 5.0, HI = 90.0;
+  float x = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
+  float z = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
+  monsters.push_back(Monster(x*quadx, 2, z*quadz, 1, 50));
+}
+
+void generateMonsters(){
+  helperGenerateMonsters(1,1);
+  helperGenerateMonsters(1,-1);
+  helperGenerateMonsters(-1,-1);
+  helperGenerateMonsters(-1,1);
+  return;
+}
 
 int monlock = 0;
 void monster_handling(){
-  if (monlock == 0)
-    monsters.push_back(Monster(20, 2, -20, 1, 50)), monlock++;
+  if (monlock == 0){
+    monlock++;
+    generateMonsters();
+  }
+    
   for (int i = 0; i < (int)monsters.size(); i++)
     {
+      //Monster Dies
       if (monsters[i].health <= 0) monsters.erase(monsters.begin() + i), score += 50;
     }
 }
