@@ -8,8 +8,11 @@ Flame::Flame(float x, float y, float z, float size, float angle, float velocity,
     this->rotation = 0;
     this->size = size;
     this->yvelocity = yvelocity;
+    this->xvelocity = 0;
+    this->zvelocity = 0;
     this->yaccel = -0.01;
     speed = 1;
+    this->damage = 50;
     // Our vertices. Three consecutive floats give a 3D vertex; Three consecutive vertices give a triangle.
     // A cube has 6 faces with 2 triangles each, so this makes 6*2=12 triangles, and 12*3 vertices
     static const GLfloat vertex_buffer_data[] = {
@@ -77,7 +80,8 @@ void Flame::tick() {
   this->position.z += this->velocity * cos(this->angle) * -1;
   this->position.y += this->yvelocity;
   this->yvelocity += this->yaccel;
-  
+  this->position.x += this->xvelocity;
+  this->position.z += this->zvelocity;
 }
 
 bounding_box_t Flame::bounding_box() {

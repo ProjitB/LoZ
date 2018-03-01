@@ -6,6 +6,8 @@ Monster::Monster(float x, float y, float z, float size, int health) {
     this->rotation = 0;
     this->size = size;
     this->health = health;
+    this->counter = 0;
+    this->countTime = 200;
     speed = 1;
     // Our vertices. Three consecutive floats give a 3D vertex; Three consecutive vertices give a triangle.
     // A cube has 6 faces with 2 triangles each, so this makes 6*2=12 triangles, and 12*3 vertices
@@ -86,7 +88,7 @@ void Monster::set_position(float x, float y) {
 void Monster::tick() {
   this->position.x += -0.03 + static_cast<float> (rand()) / (static_cast <float> (RAND_MAX/(0.06)));
   this->position.z += -0.03 + static_cast<float> (rand()) / (static_cast <float> (RAND_MAX/(0.06)));
-
+  if(this->counter < this->countTime) this->counter++;
 }
 
 bounding_box_t Monster::bounding_box() {

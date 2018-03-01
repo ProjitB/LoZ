@@ -25,6 +25,7 @@ float screen_zoom = 100, screen_center_x = 0, screen_center_y = 0;
 float camera_rotation_angle = 0;
 vector<Rock> rocks;
 vector<Flame> flames;
+vector<Flame> monflames;
 vector<Monster> monsters;
 
 Timer t60(1.0 / 60);
@@ -110,7 +111,8 @@ void draw() {
     player.draw(VP);
     testloc.draw(VP);
     for (int i = 0; i < (int)rocks.size(); rocks[i++].draw(VP));
-    for (int i = 0; i < (int)flames.size(); flames[i++].draw(VP));     
+    for (int i = 0; i < (int)flames.size(); flames[i++].draw(VP));
+    for (int i = 0; i < (int)monflames.size(); monflames[i++].draw(VP));     
     for (int i = 0; i < (int)monsters.size(); monsters[i++].draw(VP));
 }
 
@@ -181,6 +183,11 @@ void tick_elements() {
     if(flames[i].position.y < 0) flames.erase(flames.begin() + i);
     flames[i].tick();
   }
+  for (int i = 0; i < (int)monflames.size(); i++) {
+    if(monflames[i].position.y < 0 || monflames[i].position.y > 10) monflames.erase(monflames.begin() + i);
+    monflames[i].tick();
+  }
+
   for (int i = 0; i < (int)monsters.size(); i++) {
     monsters[i].tick();
   }
@@ -231,10 +238,19 @@ void cannonball_monster_collisions(){
   }
 }
 
+void detect_player_monflames_collisions() {
+  for (int i = 0; i < (int)monflames.size(); i++){
+    if (detect_collision_player(monflames[i].bounding_box(), player.bounding_box())){
+      health -= monflames[i].damage;
+      monflames.erase(monflames.begin() + i);
+    }
+  }
+}
+
 void collisions() {
   detect_player_rock_collisions();
   cannonball_monster_collisions();
-  
+  detect_player_monflames_collisions();
 }
 
 void helperGenerateRocks(float LO, float HI, float quadx, float quadz){
@@ -272,17 +288,37 @@ void generateMonsters(){
   return;
 }
 
-int monlock = 0;
+float distvec(float x1, float y1, float z1, float x2, float y2, float z2){
+  return sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) + (z1-z2)*(z1-z2));
+}
+
+bool inRange(float x1, float y1, float z1, float x2, float y2, float z2, float distance){
+  float dist = distvec(x1, y1, z1, x2, y2, z2);
+  if(dist <= distance) return 1;
+  else return 0;
+}
+
 void monster_handling(){
-  if (monlock == 0){
-    monlock++;
-    generateMonsters();
-  }
-    
   for (int i = 0; i < (int)monsters.size(); i++)
     {
       //Monster Dies
       if (monsters[i].health <= 0) monsters.erase(monsters.begin() + i), score += 50;
+      //If in Range fire and Time Gap, fire
+      if (inRange(monsters[i].position.x, monsters[i].position.y, monsters[i].position.z, player.position.x, player.position.y, player.position.z, 20) && monsters[i].counter >= monsters[i].countTime){
+        float dist = distvec(monsters[i].position.x, monsters[i].position.y, monsters[i].position.z, player.position.x, player.position.y, player.position.z);
+        float vecx = player.position.x - monsters[i].position.x;
+        float vecy = player.position.y - monsters[i].position.y;
+        float vecz = player.position.z - monsters[i].position.z;
+        float vel = 0.2;
+        float t = dist / vel;
+        Flame temp = Flame(monsters[i].position.x, monsters[i].position.y, monsters[i].position.z, 0.75, 0, 0,vel*vecy/dist, COLOR_LIGHT_BLUE );
+        temp.yaccel = 0;
+        temp.xvelocity = vel*vecx/dist;
+        temp.zvelocity = vel*vecz/dist;
+        monflames.push_back(temp);
+        monsters[i].counter = 0;
+        }
+      
     }
 }
 
@@ -292,10 +328,11 @@ void initGL(GLFWwindow *window, int width, int height) {
     /* Objects should be created before any other gl function and shaders */
     // Create the models
 
-    player       = Boat(0, 0, 3);
-    water       = Water(0, 0, 0, COLOR_BLUE);
-    testloc     = Boat(0, 0, -5);
+    player = Boat(0, 0, 3);
+    water = Water(0, 0, 0, COLOR_BLUE);
+    testloc = Boat(0, 0, -5);
     generaterocks();
+    generateMonsters();
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
     // Get a handle for our "MVP" uniform

@@ -15,10 +15,13 @@ public:
     void tick();
     double speed;
     float yvelocity;
+    float zvelocity;
+    float xvelocity;
     float yaccel;
     float velocity;
     float angle;
     float size;
+    int damage;
     bounding_box_t bounding_box();
 private:
     VAO *object;

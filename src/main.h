@@ -86,6 +86,10 @@ void cannon(int viewType);
 void monster_handling();
 void generateMonsters();
 void helperGenerateMonsters(float quadx, float quadz);
+void detect_player_monflames_collisions();
+bool inRange(float x1, float y1, float z1, float x2, float y2, float z2, float distance);
+float distvec(float x1, float y1, float z1, float x2, float y2, float z2);
+
 
 // ---- Colors ----
 extern const color_t COLOR_RED;

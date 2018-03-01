@@ -17,6 +17,8 @@ public:
     double speed;
     float size;
     int health;
+    int counter;
+    int countTime;
 private:
     VAO *main_body;
     VAO *face;
