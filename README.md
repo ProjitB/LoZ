@@ -22,5 +22,13 @@ Controls:
       3 :: Tower View
       4 :: Boat View
 
+   Mouse:
 
+      Movement :: Cursor aims cannon fire. Moving cursor away from center of screen
+                  increase the distance cannon will travel.
+
+   Other Keys:
+
+      f :: Fires cannon in general direction of cursor.
+      q :: Quits the game immeadiately.
 
