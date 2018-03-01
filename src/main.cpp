@@ -311,7 +311,7 @@ void monster_handling(){
         float vecz = player.position.z - monsters[i].position.z;
         float vel = 0.2;
         float t = dist / vel;
-        Flame temp = Flame(monsters[i].position.x, monsters[i].position.y, monsters[i].position.z, 0.75, 0, 0,vel*vecy/dist, COLOR_LIGHT_BLUE );
+        Flame temp = Flame(monsters[i].position.x, monsters[i].position.y, monsters[i].position.z, 0.75, 0, 0,vel*vecy/dist, COLOR_DARK_RED);
         temp.yaccel = 0;
         temp.xvelocity = vel*vecx/dist;
         temp.zvelocity = vel*vecz/dist;
