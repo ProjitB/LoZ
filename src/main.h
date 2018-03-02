@@ -88,8 +88,15 @@ void generateMonsters();
 void helperGenerateMonsters(float quadx, float quadz);
 void detect_player_monflames_collisions();
 bool inRange(float x1, float y1, float z1, float x2, float y2, float z2, float distance);
+bool inRangeB(float x1, float y1, float z1, float x2, float y2, float z2, float distance);
 float distvec(float x1, float y1, float z1, float x2, float y2, float z2);
 void cannonball_rock_collisions();
+void cannonball_boss_collisions();
+void monster_firing(float size, float vel);
+bool can_fire(float range);
+bool can_fire_B(float range);
+void boss_handling();
+void boss_firing(float size, float vel);
 
 // ---- Colors ----
 extern const color_t COLOR_RED;

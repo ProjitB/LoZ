@@ -5,6 +5,7 @@
 #include "rock.h"
 #include "flame.h"
 #include "monster.h"
+#include "boss.h"
 
 using namespace std;
 
@@ -27,6 +28,7 @@ vector<Rock> rocks;
 vector<Flame> flames;
 vector<Flame> monflames;
 vector<Monster> monsters;
+vector<Boss> bosses;
 
 Timer t60(1.0 / 60);
 
@@ -114,6 +116,7 @@ void draw() {
     for (int i = 0; i < (int)flames.size(); flames[i++].draw(VP));
     for (int i = 0; i < (int)monflames.size(); monflames[i++].draw(VP));     
     for (int i = 0; i < (int)monsters.size(); monsters[i++].draw(VP));
+    for (int i = 0; i < (int)bosses.size(); bosses[i++].draw(VP));
 }
 
 
@@ -176,21 +179,22 @@ void tick_camera(GLFWwindow *window) {
 void tick_elements() {
   canCount++;
   player.tick();
-  for (int i = 0; i < (int)rocks.size(); i++) {
-    rocks[i].tick();
-  }
+  for (int i = 0; i < (int)rocks.size(); rocks[i++].tick());
+  
   for (int i = 0; i < (int)flames.size(); i++) {
-    if(flames[i].position.y < 0) flames.erase(flames.begin() + i);
     flames[i].tick();
+    if(flames[i].position.y < 0) flames.erase(flames.begin() + i);
   }
+  
   for (int i = 0; i < (int)monflames.size(); i++) {
     if(monflames[i].position.y < 0 || monflames[i].position.y > 10) monflames.erase(monflames.begin() + i);
     monflames[i].tick();
   }
+  
+  for (int i = 0; i < (int)monsters.size();  monsters[i++].tick());
 
-  for (int i = 0; i < (int)monsters.size(); i++) {
-    monsters[i].tick();
-  }
+  for (int i = 0; i < (int)bosses.size(); bosses[i++].tick());
+  
   wind();
 }
 
@@ -238,6 +242,18 @@ void cannonball_monster_collisions(){
   }
 }
 
+void cannonball_boss_collisions(){
+  for (int i = 0; i < (int)bosses.size(); i++){
+    for (int j = 0; j < (int)flames.size(); j++){
+      if (detect_collision(flames[j].bounding_box(), bosses[i].bounding_box())){
+        bosses[i].health -= player.power;
+        flames.erase(flames.begin() + j);        
+      }
+    }
+  }
+}
+
+
 void cannonball_rock_collisions(){
   for(int i = 0; i < (int)flames.size(); i++){
     for(int j = 0; j < (int)rocks.size(); j++)
@@ -264,6 +280,7 @@ void collisions() {
   cannonball_monster_collisions();
   detect_player_monflames_collisions();
   cannonball_rock_collisions();
+  cannonball_boss_collisions();
 }
 
 void helperGenerateRocks(float LO, float HI, float quadx, float quadz){
@@ -286,18 +303,18 @@ void generaterocks(){
 
   return;
 }
-void helperGenerateMonsters(float quadx, float quadz){
+void helperGenerateMonsters(float quadx, float quadz, float size){
   float LO = 5.0, HI = 90.0;
   float x = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
   float z = LO + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HI-LO)));
-  monsters.push_back(Monster(x*quadx, 2, z*quadz, 1, 50));
+  monsters.push_back(Monster(x*quadx, 2*size, z*quadz, size, 50));
 }
 
 void generateMonsters(){
-  helperGenerateMonsters(1,1);
-  helperGenerateMonsters(1,-1);
-  helperGenerateMonsters(-1,-1);
-  helperGenerateMonsters(-1,1);
+  helperGenerateMonsters(1,1,1);
+  helperGenerateMonsters(1,-1,1);
+  helperGenerateMonsters(-1,-1,1);
+  helperGenerateMonsters(-1,1,1);
   return;
 }
 
@@ -305,37 +322,96 @@ float distvec(float x1, float y1, float z1, float x2, float y2, float z2){
   return sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) + (z1-z2)*(z1-z2));
 }
 
-bool inRange(float x1, float y1, float z1, float x2, float y2, float z2, float distance){
+bool inRange(float x1, float y1, float z1, float distance, Monster& M){
+  float x2 = M.position.x, y2 = M.position.y, z2 = M.position.z;
   float dist = distvec(x1, y1, z1, x2, y2, z2);
   if(dist <= distance) return 1;
   else return 0;
 }
 
+bool inRangeB(float x1, float y1, float z1, float distance, Boss& M){
+  float x2 = M.position.x, y2 = M.position.y, z2 = M.position.z;
+  float dist = distvec(x1, y1, z1, x2, y2, z2);
+  if(dist <= distance) return 1;
+  else return 0;
+}
+
+
+void monster_firing(Monster& M, float size, float vel, int damage){
+  float dist = distvec(M.position.x, M.position.y, M.position.z, player.position.x, player.position.y, player.position.z);
+  float vecx = player.position.x - M.position.x;
+  float vecy = player.position.y - M.position.y;
+  float vecz = player.position.z - M.position.z;
+  float t = dist / vel;
+  Flame temp = Flame(M.position.x, M.position.y, M.position.z, size, 0, 0,vel*vecy/dist, COLOR_DARK_RED);
+  temp.yaccel = 0;
+  temp.xvelocity = vel*vecx/dist;
+  temp.zvelocity = vel*vecz/dist;
+  temp.damage = damage;
+  monflames.push_back(temp);
+  M.counter = 0;
+  return;
+}
+
+
+void boss_firing(Boss& M, float size, float vel, int damage){
+  float dist = distvec(M.position.x, M.position.y, M.position.z, player.position.x, player.position.y, player.position.z);
+  float vecx = player.position.x - M.position.x;
+  float vecy = player.position.y - M.position.y;
+  float vecz = player.position.z - M.position.z;
+  float t = dist / vel;
+  Flame temp = Flame(M.position.x, M.position.y, M.position.z, size, 0, 0,vel*vecy/dist, COLOR_DARK_RED);
+  temp.yaccel = 0;
+  temp.xvelocity = vel*vecx/dist;
+  temp.zvelocity = vel*vecz/dist;
+  temp.damage = damage;
+  monflames.push_back(temp);
+  M.counter = 0;
+  return;
+}
+
+
+bool can_fire(Monster& M, float range){
+  if (inRange(player.position.x, player.position.y, player.position.z, range, M) && M.counter >= M.countTime) return 1;
+  return 0;
+}
+
+bool can_fire_B(Boss& M, float range){
+  if (inRangeB(player.position.x, player.position.y, player.position.z, range, M) && M.counter >= M.countTime) return 1;
+  return 0;
+}
+
+
+void boss_handling(){
+  for (int i = 0; i < (int)bosses.size(); i++)
+    {
+        //Monster Dies
+      if (bosses[i].health <= 0) bosses.erase(bosses.begin() + i), score += 200;
+      if(can_fire_B(bosses[i], 150))
+        boss_firing(bosses[i], 1.5, 0.3, 200);
+    }
+}
+
+int bosslock = 0;
 void monster_handling(){
   for (int i = 0; i < (int)monsters.size(); i++)
     {
       //Monster Dies
       if (monsters[i].health <= 0) monsters.erase(monsters.begin() + i), score += 50;
-      if (monsters.size() == 0) {
+      if (monsters.size() == 0 && bosslock == 0) {
         //Create Boss
-        ;
+        bosslock = 1;
+        float x = -95 + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(190)));
+        float z = -95 + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(190)));
+        Boss temp = Boss(x, 10, z, 5, 200);
+        temp.countTime = 100;
+        temp.isBoss = 1;
+        bosses.push_back(temp);
       }
       //If in Range fire and Time Gap, fire
-      if (inRange(monsters[i].position.x, monsters[i].position.y, monsters[i].position.z, player.position.x, player.position.y, player.position.z, 20) && monsters[i].counter >= monsters[i].countTime){
-        float dist = distvec(monsters[i].position.x, monsters[i].position.y, monsters[i].position.z, player.position.x, player.position.y, player.position.z);
-        float vecx = player.position.x - monsters[i].position.x;
-        float vecy = player.position.y - monsters[i].position.y;
-        float vecz = player.position.z - monsters[i].position.z;
-        float vel = 0.2;
-        float t = dist / vel;
-        Flame temp = Flame(monsters[i].position.x, monsters[i].position.y, monsters[i].position.z, 0.75, 0, 0,vel*vecy/dist, COLOR_DARK_RED);
-        temp.yaccel = 0;
-        temp.xvelocity = vel*vecx/dist;
-        temp.zvelocity = vel*vecz/dist;
-        monflames.push_back(temp);
-        monsters[i].counter = 0;
+      if (can_fire(monsters[i], 20.0)){
+        monster_firing(monsters[i], 0.75, 0.2, 50);
         }
-      
     }
 }
 
@@ -396,6 +472,7 @@ int main(int argc, char **argv) {
           // Swap Frame Buffer in double buffering
           glfwSwapBuffers(window);
           monster_handling();
+          boss_handling();
           tick_elements();
           collisions();
           tick_camera(window);

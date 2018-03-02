@@ -1,13 +1,13 @@
 #include "main.h"
 
-#ifndef MONSTER_H
-#define MONSTER_H
+#ifndef BOSS_H
+#define BOSS_H
 
 
-class Monster {
+class Boss {
 public:
-    Monster() {}
-    Monster(float x, float y, float z, float size, int health);
+    Boss() {}
+    Boss(float x, float y, float z, float size, int health);
     glm::vec3 position;
     float rotation;
     void draw(glm::mat4 VP);
@@ -25,4 +25,4 @@ private:
     VAO *face;
 };
 
-#endif // MONSTER_H
+#endif // BOSS_H
