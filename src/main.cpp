@@ -18,7 +18,7 @@ GLFWwindow *window;
 * Customizable functions *
 **************************/
 
-int health = 1000, level = 1, score = 0;
+int health = 100, level = 1, score = 0;
 Boat player;
 Water water;
 Boat testloc;
@@ -514,6 +514,10 @@ int main(int argc, char **argv) {
           collisions();
           tick_camera(window);
           tick_input(window);
+          if(health <= 0){
+            cout << "Sorry, you died. Score: " << score << "\n";
+            quit(window);
+          }
         }
 
         // Poll for Keyboard and mouse events
