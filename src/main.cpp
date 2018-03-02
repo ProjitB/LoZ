@@ -238,6 +238,18 @@ void cannonball_monster_collisions(){
   }
 }
 
+void cannonball_rock_collisions(){
+  for(int i = 0; i < (int)flames.size(); i++){
+    for(int j = 0; j < (int)rocks.size(); j++)
+      if(detect_collision(flames[i].bounding_box(), rocks[j].bounding_box())){
+        score += 1;
+        flames.erase(flames.begin() + i);
+        rocks.erase(rocks.begin() + j);        
+      }
+  }
+    
+}
+
 void detect_player_monflames_collisions() {
   for (int i = 0; i < (int)monflames.size(); i++){
     if (detect_collision_player(monflames[i].bounding_box(), player.bounding_box())){
@@ -251,6 +263,7 @@ void collisions() {
   detect_player_rock_collisions();
   cannonball_monster_collisions();
   detect_player_monflames_collisions();
+  cannonball_rock_collisions();
 }
 
 void helperGenerateRocks(float LO, float HI, float quadx, float quadz){
@@ -303,6 +316,10 @@ void monster_handling(){
     {
       //Monster Dies
       if (monsters[i].health <= 0) monsters.erase(monsters.begin() + i), score += 50;
+      if (monsters.size() == 0) {
+        //Create Boss
+        ;
+      }
       //If in Range fire and Time Gap, fire
       if (inRange(monsters[i].position.x, monsters[i].position.y, monsters[i].position.z, player.position.x, player.position.y, player.position.z, 20) && monsters[i].counter >= monsters[i].countTime){
         float dist = distvec(monsters[i].position.x, monsters[i].position.y, monsters[i].position.z, player.position.x, player.position.y, player.position.z);
