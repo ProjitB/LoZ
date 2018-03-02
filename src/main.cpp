@@ -6,6 +6,7 @@
 #include "flame.h"
 #include "monster.h"
 #include "boss.h"
+#include "powerup.h"
 
 using namespace std;
 
@@ -29,6 +30,7 @@ vector<Flame> flames;
 vector<Flame> monflames;
 vector<Monster> monsters;
 vector<Boss> bosses;
+vector<Powerup> powerups;
 
 Timer t60(1.0 / 60);
 
@@ -117,6 +119,7 @@ void draw() {
     for (int i = 0; i < (int)monflames.size(); monflames[i++].draw(VP));     
     for (int i = 0; i < (int)monsters.size(); monsters[i++].draw(VP));
     for (int i = 0; i < (int)bosses.size(); bosses[i++].draw(VP));
+    for (int i = 0; i < (int)powerups.size(); powerups[i++].draw(VP));
 }
 
 
@@ -146,7 +149,7 @@ void tick_input(GLFWwindow *window) {
 int canCount = 0;
 void cannon(int viewType){
   if (viewType == 1 || viewType == 2){
-    if(canCount < 40) return;
+    if(canCount < player.countTime) return;
     canCount = 0;
     double xpos, ypos;
     glfwGetCursorPos(window, &xpos, &ypos);
@@ -194,6 +197,7 @@ void tick_elements() {
   for (int i = 0; i < (int)monsters.size();  monsters[i++].tick());
 
   for (int i = 0; i < (int)bosses.size(); bosses[i++].tick());
+  for (int i = 0; i < (int)powerups.size(); powerups[i++].tick());
   
   wind();
 }
@@ -275,12 +279,32 @@ void detect_player_monflames_collisions() {
   }
 }
 
+void detect_player_powerups_collisions(){
+  for (int i = 0; i < (int)powerups.size(); i++){
+    if (detect_collision_player(powerups[i].bounding_box(), player.bounding_box())){
+      switch(powerups[i].type){
+      case 1:
+        health += powerups[i].value;
+        break;
+      case 2:
+        player.countTime += powerups[i].value;
+        break;
+      case 3:
+        score += powerups[i].value;
+        break;
+      }
+      powerups.erase(powerups.begin() + i);
+    }
+  }
+}
+
 void collisions() {
   detect_player_rock_collisions();
   cannonball_monster_collisions();
   detect_player_monflames_collisions();
   cannonball_rock_collisions();
   cannonball_boss_collisions();
+  detect_player_powerups_collisions();
 }
 
 void helperGenerateRocks(float LO, float HI, float quadx, float quadz){
@@ -388,7 +412,7 @@ void boss_handling(){
         //Monster Dies
       if (bosses[i].health <= 0) bosses.erase(bosses.begin() + i), score += 200;
       if(can_fire_B(bosses[i], 150))
-        boss_firing(bosses[i], 1.5, 0.3, 200);
+        boss_firing(bosses[i], 3, 0.3, 200);
     }
 }
 
@@ -397,7 +421,12 @@ void monster_handling(){
   for (int i = 0; i < (int)monsters.size(); i++)
     {
       //Monster Dies
-      if (monsters[i].health <= 0) monsters.erase(monsters.begin() + i), score += 50;
+      if (monsters[i].health <= 0){
+        int typePowerup = (rand() % 3) + 1;
+        powerups.push_back(Powerup(monsters[i].position.x, monsters[i].position.y - 0.5, monsters[i].position.z, typePowerup));
+        monsters.erase(monsters.begin() + i);
+        score += 50;
+      } 
       if (monsters.size() == 0 && bosslock == 0) {
         //Create Boss
         bosslock = 1;
@@ -414,6 +443,13 @@ void monster_handling(){
         }
     }
 }
+
+void powerups_handling(){
+  for(int i = 0; i < (int)powerups.size(); i++){
+    if(powerups[i].counter > powerups[i].countMax) powerups.erase(powerups.begin() + i);
+  }
+}
+
 
 /* Initialize the OpenGL rendering properties */
 /* Add all the models to be created here */
@@ -473,6 +509,7 @@ int main(int argc, char **argv) {
           glfwSwapBuffers(window);
           monster_handling();
           boss_handling();
+          powerups_handling();
           tick_elements();
           collisions();
           tick_camera(window);

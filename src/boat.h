@@ -23,6 +23,7 @@ public:
     float yvelocity;
     float zautovelocity;
     float xautovelocity;
+    int countTime;
 private:
     VAO *frame_bottom;
     VAO *frame_sides;
